@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorio Acústico</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
+        img { max-width: 300px; }
+        audio { width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Repositorio de Investigación Acústica</h1>
+    <a href="{{ url_for('upload_file') }}">Subir Nueva Grabación</a>
+    <hr>
+
+    <h2>Grabaciones en la Base de Datos</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Audio</th>
+                <th>Espectrograma</th>
+                <th>Metadatos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grabacion in grabaciones %}
+            <tr>
+                <td style="width: 30%;">
+                    <audio controls>
+                        <source src="{{ url_for('play_audio', filename=grabacion.nombre_archivo) }}" type="audio/wav">
+                        Tu navegador no soporta el elemento de audio.
+                    </audio>
+                    <small>{{ grabacion.nombre_archivo }}</small>
+                </td>
+                <td style="width: 35%;">
+                    <img src="{{ url_for('get_spectrogram', filename=grabacion.path_espectrograma) }}" alt="Espectrograma">
+                </td>
+                <td style="width: 35%;">
+                    <strong>Locación:</strong> {{ grabacion.locacion or 'N/A' }} <br>
+                    <strong>Investigador:</strong> {{ grabacion.investigador or 'N/A' }} <br>
+                    <strong>Descripción:</strong> {{ grabacion.descripcion or 'N/A' }} <br>
+                    <strong>Tags:</strong> {{ grabacion.tags or 'N/A' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Audio</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        input, textarea { width: 300px; padding: 5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Subir nueva grabación</h1>
+
+    <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+
+        <p>
+            <label for="file">Archivo de Audio (ej: .wav):</label><br>
+            <input typea"file" name="file" id="file" required>
+        </p>
+        <p>
+            <label for="locacion">Locación:</label><br>
+            <input type="text" name="locacion" id="locacion">
+        </p>
+        <p>
+            <label for="investigador">Investigador:</label><br>
+            <input type="text" name="investigador" id="investigador">
+        </p>
+        <p>
+            <label for="descripcion">Descripción:</label><br>
+            <textarea name="descripcion" id="descripcion" rows="4"></textarea>
+        </p>
+        <p>
+            <label for="tags">Tags (separados por comas):</label><br>
+            <input type="text" name="tags" id="tags">
+        </p>
+        <p>
+            <input type="submit" value="Subir y Procesar">
+        </p>
+
+    </form>
+    <a href="{{ url_for('index') }}">Volver al Dashboard</a>
+</body>
+</html>
