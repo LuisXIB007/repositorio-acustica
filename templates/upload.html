@@ -34,6 +34,19 @@
             <input type="text" name="tags" id="tags">
         </p>
         <p>
+           <label for="aula_id">Aula de Medición:</label><br>
+           <select name="aula_id" id="aula_id" required>
+              <option value="">-- Selecciona un aula --</option>
+
+             {% for aula in aulas %}
+                <option value="{{ aula.id }}">
+                    {{ aula.edificio }} - {{ aula.nombre_aula }}
+                </option>
+             {% endfor %}
+
+           </select>
+        </p>
+        <p>
             <input type="submit" value="Subir y Procesar">
         </p>
 

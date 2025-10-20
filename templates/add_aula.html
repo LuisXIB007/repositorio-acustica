@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Aula{% endblock %}
+
+{% block content %}
+<h1>Registrar Nueva Aula</h1>
+<hr>
+<div class="card card-body bg-light">
+  <form method="POST" action="{{ url_for('add_aula') }}" enctype="multipart/form-data">
+
+    <div class="mb-3">
+      <label for="edificio" class="form-label">Edificio:</label>
+      <input type="text" name="edificio" id="edificio" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="nombre_aula" class="form-label">Nombre o Número de Aula:</label>
+      <input type="text" name="nombre_aula" id="nombre_aula" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="materiales" class="form-label">Materiales (describir):</label>
+      <textarea name="materiales" id="materiales" rows="3" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="num_ventanas" class="form-label">Número de Ventanas:</label>
+      <input type="number" name="num_ventanas" id="num_ventanas" value="0" class="form-control">
+    </div>
+
+    <div class="form-check mb-3">
+      <input type="checkbox" name="cielo_raso" id="cielo_raso" class="form-check-input">
+      <label for="cielo_raso" class="form-check-label">¿Tiene cielo raso?</label>
+    </div>
+
+    <div class="form-check mb-3">
+      <input type="checkbox" name="paredes_yeso" id="paredes_yeso" class="form-check-input">
+      <label for="paredes_yeso" class="form-check-label">¿Paredes de Yeso (Drywall)?</label>
+    </div>
+
+    <div class="mb-3">
+      <label for="imagenes" class="form-label">Imágenes del aula (puedes subir varias):</label>
+      <input type="file" name="imagenes" id="imagenes" multiple accept="image/*" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Aula</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+
+  </form>
+</div>
+{% endblock %}

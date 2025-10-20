@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Repositorio de Aulas</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f4; }
+        h1, h2 { color: #333; }
+        .container { max-width: 1000px; margin: auto; }
+        .aula { background-color: #fff; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        .aula-header { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .aula-header h2 { margin: 0; }
+        .aula-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .aula-details li { list-style: none; padding: 5px 0; }
+        .aula-images img { width: 150px; height: 150px; object-fit: cover; border-radius: 4px; margin: 5px; border: 1px solid #ddd; }
+        .btn { display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 20px; }
+        /* ... añade esto dentro de la etiqueta <style> ... */
+        .aula-link {
+             color: #0056b3;
+             text-decoration: none;
+        }
+        .aula-link:hover {
+           text-decoration: underline;
+        }
+        .search-container { margin: 20px 0; }
+        .search-container input[type="text"] { width: 300px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        .btn-search { padding: 10px 15px; background-color: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Repositorio de Aulas de Acústica</h1>
+        <a href="{{ url_for('add_aula') }}" class="btn">Registrar Nueva Aula</a>
+
+        <div class="search-container">
+            <form method="GET" action="{{ url_for('index') }}">
+                <input type="text" name="q" placeholder="Buscar por edificio, aula, materiales..." 
+                    value="{{ request.args.get('q', '') }}">
+                <button type="submit" class="btn-search">Buscar</button>
+            </form>
+        </div>
+
+        <hr>
+
+        <h2>Aulas Registradas</h2>
+
+        {% for aula in aulas %}
+        <div class="aula">
+            <div class="aula-header">
+                <h2>
+                    <a href="{{ url_for('aula_detalle', aula_id=aula.id) }}" class="aula-link">
+                         {{ aula.edificio }} - {{ aula.nombre_aula }}
+                     </a>
+                </h2>
+            </div>
+            <div class="aula-body">
+                <div class="aula-details">
+                    <h3>Detalles:</h3>
+                    <ul>
+                        <li><strong>Materiales:</strong> {{ aula.materiales or 'N/A' }}</li>
+                        <li><strong>Ventanas:</strong> {{ aula.num_ventanas }}</li>
+                        <li><strong>Cielo Raso:</strong> {% if aula.cielo_raso %}Sí{% else %}No{% endif %}</li>
+                        <li><strong>Paredes de Yeso:</strong> {% if aula.paredes_yeso %}Sí{% else %}No{% endif %}</li>
+                    </ul>
+                </div>
+                <div class="aula-images">
+                    <h3>Imágenes:</h3>
+
+                    {% for img in aula.imagenes %}
+                        <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto de aula">
+                    {% else %}
+                        <p>No hay imágenes para esta aula.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <p>No hay aulas registradas todavía. ¡Añade una!</p>
+        {% endfor %}
+
+    </div>
+</body>
+</html>

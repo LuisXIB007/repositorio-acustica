@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editando {{ aula.nombre_aula }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        input[type="text"], input[type="number"], textarea, select { 
+            width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; 
+        }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        .checkbox-label { font-weight: normal; }
+        .image-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .image-preview div { border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
+        .image-preview img { width: 100px; height: 100px; object-fit: cover; }
+        .btn-submit { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Editando Aula: {{ aula.edificio }} - {{ aula.nombre_aula }}</h1>
+    
+    <form method="POST" action="{{ url_for('edit_aula', aula_id=aula.id) }}" enctype="multipart/form-data">
+        
+        <label for="edificio">Edificio:</label>
+        <input type="text" name="edificio" id="edificio" value="{{ aula.edificio }}" required>
+        
+        <label for="nombre_aula">Nombre o Número de Aula:</label>
+        <input type="text" name="nombre_aula" id="nombre_aula" value="{{ aula.nombre_aula }}" required>
+        
+        <label for="materiales">Materiales (describir):</label>
+        <textarea name="materiales" id="materiales" rows="3">{{ aula.materiales }}</textarea>
+        
+        <label for="num_ventanas">Número de Ventanas:</label>
+        <input type="number" name="num_ventanas" id="num_ventanas" value="{{ aula.num_ventanas }}">
+        
+        <div>
+            <input type="checkbox" name="cielo_raso" id="cielo_raso" {% if aula.cielo_raso %}checked{% endif %}>
+            <label for="cielo_raso" class="checkbox-label">¿Tiene cielo raso?</label>
+        </div>
+        
+        <div>
+            <input type="checkbox" name="paredes_yeso" id="paredes_yeso" {% if aula.paredes_yeso %}checked{% endif %}>
+            <label for="paredes_yeso" class="checkbox-label">¿Paredes de Yeso (Drywall)?</label>
+        </div>
+
+        <hr>
+
+        <label>Imágenes Existentes:</label>
+        <div class="image-preview">
+            {% for img in aula.imagenes %}
+            <div>
+                <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto">
+                <br>
+                <input type="checkbox" name="delete_image" value="{{ img.id }}">
+                <label class="checkbox-label">Marcar para Borrar</label>
+            </div>
+            {% else %}
+            <p>No hay imágenes.</p>
+            {% endfor %}
+        </div>
+
+        <label for="imagenes">Añadir Nuevas Imágenes:</label>
+        <input type="file" name="imagenes" id="imagenes" multiple accept="image/*">
+        
+        <p>
+            <input type="submit" value="Guardar Cambios" class="btn-submit">
+        </p>
+    
+    </form>
+    
+    <a href="{{ url_for('aula_detalle', aula_id=aula.id) }}">Cancelar y Volver</a>
+</body>
+</html>

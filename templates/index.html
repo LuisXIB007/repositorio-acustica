@@ -1,54 +1,58 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repositorio Acústico</title>
-    <style>
-        body { font-family: sans-serif; margin: 2em; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
-        img { max-width: 300px; }
-        audio { width: 100%; }
-    </style>
-</head>
-<body>
-    <h1>Repositorio de Investigación Acústica</h1>
-    <a href="{{ url_for('upload_file') }}">Subir Nueva Grabación</a>
-    <hr>
+{% extends 'base.html' %}
 
-    <h2>Grabaciones en la Base de Datos</h2>
+{% block title %}Dashboard de Aulas{% endblock %}
 
-    <table>
-        <thead>
-            <tr>
-                <th>Audio</th>
-                <th>Espectrograma</th>
-                <th>Metadatos</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for grabacion in grabaciones %}
-            <tr>
-                <td style="width: 30%;">
-                    <audio controls>
-                        <source src="{{ url_for('play_audio', filename=grabacion.nombre_archivo) }}" type="audio/wav">
-                        Tu navegador no soporta el elemento de audio.
-                    </audio>
-                    <small>{{ grabacion.nombre_archivo }}</small>
-                </td>
-                <td style="width: 35%;">
-                    <img src="{{ url_for('get_spectrogram', filename=grabacion.path_espectrograma) }}" alt="Espectrograma">
-                </td>
-                <td style="width: 35%;">
-                    <strong>Locación:</strong> {{ grabacion.locacion or 'N/A' }} <br>
-                    <strong>Investigador:</strong> {{ grabacion.investigador or 'N/A' }} <br>
-                    <strong>Descripción:</strong> {{ grabacion.descripcion or 'N/A' }} <br>
-                    <strong>Tags:</strong> {{ grabacion.tags or 'N/A' }}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Aulas Registradas</h1>
+  <a href="{{ url_for('add_aula') }}" class="btn btn-primary">Registrar Nueva Aula</a>
+</div>
+
+<div class="search-container mb-4">
+  <form method="GET" action="{{ url_for('index') }}">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Buscar por edificio, aula, materiales..." value="{{ request.args.get('q', '') }}">
+      <button type="submit" class="btn btn-info">Buscar</button>
+    </div>
+  </form>
+</div>
+
+{% for aula in aulas %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h2 class="h5 mb-0">
+      <a href="{{ url_for('aula_detalle', aula_id=aula.id) }}" class="text-decoration-none">
+        {{ aula.edificio }} - {{ aula.nombre_aula }}
+      </a>
+    </h2>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <h5 class="card-title">Detalles</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><strong>Materiales:</strong> {{ aula.materiales or 'N/A' }}</li>
+          <li class="list-group-item"><strong>Ventanas:</strong> {{ aula.num_ventanas }}</li>
+          <li class="list-group-item"><strong>Cielo Raso:</strong> {% if aula.cielo_raso %}Sí{% else %}No{% endif %}</li>
+          <li class="list-group-item"><strong>Paredes de Yeso:</strong> {% if aula.paredes_yeso %}Sí{% else %}No{% endif %}</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h5 class="card-title">Imágenes</h5>
+        <div class="d-flex flex-wrap">
+          {% for img in aula.imagenes|batch(4)|first %} <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto de aula" class="img-thumbnail m-1" style="width: 100px; height: 100px; object-fit: cover;">
+          {% else %}
+            <p>No hay imágenes.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+  <div class="alert alert-warning" role="alert">
+    No hay aulas registradas todavía. ¡Añade una!
+  </div>
+{% endfor %}
+
+{% endblock %}

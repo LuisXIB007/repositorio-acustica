@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de {{ aula.nombre_aula }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f9f9f9; }
+        .container { max-width: 900px; margin: auto; background-color: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 25px; }
+        h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .details-list { list-style: none; padding: 0; }
+        .details-list li { font-size: 1.1em; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+        .details-list li strong { color: #333; min-width: 150px; display: inline-block; }
+        .images-section h2 { border-top: 2px solid #eee; padding-top: 20px; margin-top: 30px; }
+        .images-gallery { display: flex; flex-wrap: wrap; gap: 15px; }
+        .images-gallery img { width: 250px; height: 250px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007bff; }
+        .btn-edit {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #ffc107; /* Un color amarillo para "editar" */
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn-edit:hover {
+           background-color: #e0a800;
+        }
+        .btn-delete {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #dc3545; /* Un color rojo para "peligro" */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            border: none; /* Para que parezca un botón y no un input */
+            cursor: pointer;
+        }
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+        .form-container {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .form-container label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .form-container input[type="text"],
+        .form-container input[type="file"],
+        .form-container textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+        }
+        .btn-submit {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745; /* Verde */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+        .audio-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .audio-list th,
+        .audio-list td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .audio-list th {
+            background-color: #f4f4f4;
+        }
+        .audio-list { width: 100%; border-collapse: collapse; margin-top: 20px; 
+        }
+        .audio-list th, .audio-list td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; 
+        }
+        .audio-list th { background-color: #f4f4f4; 
+        }
+        .btn-delete-small { padding: 5px 8px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+          
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="back-link">&larr; Volver al Dashboard</a>
+
+        <h1>{{ aula.edificio }} - {{ aula.nombre_aula }}</h1>
+
+        <div classs"details-grid">
+            <div class="details-left">
+                <h3>Detalles del Aula</h3>
+                <ul class="details-list">
+                    <li><strong>Materiales:</strong> {{ aula.materiales or 'N/A' }}</li>
+                    <li><strong>Núm. Ventanas:</strong> {{ aula.num_ventanas }}</li>
+                    <li><strong>Cielo Raso:</strong> {% if aula.cielo_raso %}Sí{% else %}No{% endif %}</li>
+                    <li><strong>Paredes de Yeso:</strong> {% if aula.paredes_yeso %}Sí{% else %}No{% endif %}</li>
+                </ul>
+            </div>
+            <div class="details-right">
+                <h3>Acciones</h3>
+                <a href="{{ url_for('edit_aula', aula_id=aula.id) }}" class="btn-edit">
+                    Editar esta Aula
+                </a>
+                <form method="POST" action="{{ url_for('delete_aula', aula_id=aula.id) }}" style="margin-top: 10px;">
+                    <button type="submit" class="btn-delete" 
+                            onclick="return confirm('¿Estás 100% seguro? Esto borrará el aula, TODAS sus imágenes y TODAS sus grabaciones. Esta acción no se puede deshacer.')">
+                        Borrar esta Aula
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="images-section">
+            <h2>Imágenes del Aula</h2>
+            <div class="images-gallery">
+                {% for img in aula.imagenes %}
+                    <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto de {{ aula.nombre_aula }}">
+                {% else %}
+                    <p>No hay imágenes registradas para esta aula.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="audio-section">
+            <h2>Grabaciones Acústicas</h2>
+
+            <div class="form-container">
+                <h3>Subir Nueva Grabación</h3>
+                <form id="audio-form" method="POST" action="{{ url_for('upload_audio', aula_id=aula.id) }}" enctype="multipart/form-data">
+
+                    <label for="file">Archivo de Audio (.wav, .mp3) [< 20MB]:</label>
+                    <input type="file" name="file" id="file" required>
+
+                    <label for="investigador">Investigador:</label>
+                    <input type="text" name="investigador" id="investigador" placeholder="Ej: A. Pérez">
+
+                    <label for="descripcion">Descripción:</label>
+                    <textarea name="descripcion" id="descripcion" rows="3" placeholder="Ej: Ruido de fondo con ventana abierta"></textarea>
+
+                    <button type="submit" id="submit-audio-btn" class="btn-submit">Subir y Procesar Audio</button>
+                    <div id="loader" class="loader" style="display: none;"></div>
+                </form>
+            </div>
+            <hr style="margin: 30px 0;">
+
+            <h3>Grabaciones Existentes</h3>
+            <table class="audio-list">
+                <thead>
+                    <tr>
+                        <th>Reproductor de Audio</th>
+                        <th>Espectrograma</th>
+                        <th>Detalles de la Grabación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grabacion in aula.grabaciones %}
+                    <tr>
+                        <td style="width: 30%;">
+                            <audio controls style="width: 100%;">
+                                <source src="{{ url_for('play_audio', filename=grabacion.nombre_archivo) }}" type="audio/wav">
+                                Tu navegador no soporta el audio.
+                            </audio>
+                            <small>{{ grabacion.nombre_archivo }}</small>
+                        </td>
+                        <td style="width: 35%;">
+                            <img src="{{ url_for('get_spectrogram', filename=grabacion.path_espectrograma) }}" alt="Espectrograma" style="max-width: 100%;">
+                        </td>
+                        <td style="width: 35%;">
+                            <strong>Investigador:</strong> {{ grabacion.investigador or 'N/A' }}
+                            <br>
+                            <strong>Descripción:</strong> {{ grabacion.descripcion or 'N/A' }}
+                            <form method="POST" action="{{ url_for('delete_audio', grabacion_id=grabacion.id) }}" style="margin-top: 10px;">
+                                <button type="submit" class="btn-delete-small"
+                                        onclick="return confirm('¿Seguro que quieres borrar esta grabación? Esto es permanente.')">
+                                    Borrar grabación
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Aún no hay grabaciones para esta aula.</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+            </table>
+        </div>
+
+    </div>
+<script>
+    document.getElementById('audio-form').addEventListener('submit', function() {
+        // 1. Mostrar el spinner
+        document.getElementById('loader').style.display = 'block';
+
+        // 2. Deshabilitar el botón y cambiar su texto
+        var btn = document.getElementById('submit-audio-btn');
+        btn.disabled = true;
+        btn.innerText = 'Procesando, por favor espera...';
+    });
+</script>
+</body>
+</html>

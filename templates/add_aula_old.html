@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Añadir Nueva Aula</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        input, textarea, select { width: 300px; padding: 5px; margin-bottom: 10px; box-sizing: border-box; }
+        label { display: block; margin-top: 10px; }
+        .checkbox-label { display: inline; margin-left: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Registrar Nueva Aula</h1>
+
+    <form method="POST" action="{{ url_for('add_aula') }}" enctype="multipart/form-data">
+
+        <label for="edificio">Edificio:</label>
+        <input type="text" name="edificio" id="edificio" required>
+
+        <label for="nombre_aula">Nombre o Número de Aula:</label>
+        <input type="text" name="nombre_aula" id="nombre_aula" required>
+
+        <label for="materiales">Materiales (describir):</label>
+        <textarea name="materiales" id="materiales" rows="3"></textarea>
+
+        <label for="num_ventanas">Número de Ventanas:</label>
+        <input type="number" name="num_ventanas" id="num_ventanas" value="0">
+
+        <div>
+            <input type="checkbox" name="cielo_raso" id="cielo_raso">
+            <label for="cielo_raso" class="checkbox-label">¿Tiene cielo raso?</label>
+        </div>
+
+        <div>
+            <input type="checkbox" name="paredes_yeso" id="paredes_yeso">
+            <label for="paredes_yeso" class="checkbox-label">¿Tiene paredes de Yeso (Gypsum)?</label>
+        </div>
+
+        <label for="imagenes">Imágenes del aula (puedes subir varias):</label>
+        <input type="file" name="imagenes" id="imagenes" multiple accept="image/*">
+
+        <p>
+            <input type="submit" value="Guardar Aula">
+        </p>
+
+    </form>
+
+    <a href="{{ url_for('index') }}">Volver al Dashboard</a>
+</body>
+</html>

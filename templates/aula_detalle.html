@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle: {{ aula.nombre_aula }}{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('index') }}" class="btn btn-outline-secondary mb-3">&larr; Volver al Dashboard</a>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h1>{{ aula.edificio }} - {{ aula.nombre_aula }}</h1>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-8">
+        <h3>Detalles del Aula</h3>
+        <ul class="list-group">
+          <li class="list-group-item"><strong>Materiales:</strong> {{ aula.materiales or 'N/A' }}</li>
+          <li class="list-group-item"><strong>Núm. Ventanas:</strong> {{ aula.num_ventanas }}</li>
+          <li class="list-group-item"><strong>Cielo Raso:</strong> {% if aula.cielo_raso %}Sí{% else %}No{% endif %}</li>
+          <li class="list-group-item"><strong>Paredes de Yeso:</strong> {% if aula.paredes_yeso %}Sí{% else %}No{% endif %}</li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <h3>Acciones</h3>
+        <a href="{{ url_for('edit_aula', aula_id=aula.id) }}" class="btn btn-warning w-100 mb-2">
+          Editar esta Aula
+        </a>
+        <form method="POST" action="{{ url_for('delete_aula', aula_id=aula.id) }}">
+          <button type="submit" class="btn btn-danger w-100" 
+                  onclick="return confirm('¿Estás 100% seguro? Esto borrará el aula y TODOS sus datos. Esta acción no se puede deshacer.')">
+            Borrar esta Aula
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <h2 class="mt-4">Imágenes del Aula</h2>
+    <hr>
+    <div class="row g-2">
+      {% for img in aula.imagenes %}
+        <div class="col-md-3">
+          <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto de {{ aula.nombre_aula }}" class="img-fluid img-thumbnail">
+        </div>
+      {% else %}
+        <p>No hay imágenes registradas para esta aula.</p>
+      {% endfor %}
+    </div>
+
+    <h2 class="mt-5">Grabaciones Acústicas</h2>
+    <hr>
+
+    <div class="card card-body bg-light mb-4">
+      <h3>Subir Nueva Grabación</h3>
+      <form id="audio-form" method="POST" action="{{ url_for('upload_audio', aula_id=aula.id) }}" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="file" class="form-label">Archivo de Audio (.wav, .mp3):</label>
+          <input type="file" name="file" id="file" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="investigador" class="form-label">Investigador:</label>
+          <input type="text" name="investigador" id="investigador" class="form-control" placeholder="Ej: A. Pérez">
+        </div>
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción:</label>
+          <textarea name="descripcion" id="descripcion" rows="3" class="form-control" placeholder="Ej: Ruido de fondo con ventana abierta"></textarea>
+        </div>
+
+        <button type="submit" id="submit-audio-btn" class="btn btn-success">
+          Subir y Procesar Audio
+        </button>
+
+        <div id="loader" class="spinner-border text-primary ms-3" role="status" style="display: none;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </form>
+    </div>
+
+    <h3>Grabaciones Existentes</h3>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Reproductor</th>
+            <th>Espectrograma</th>
+            <th>Detalles</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for grabacion in aula.grabaciones %}
+          <tr>
+            <td style="width: 25%;">
+              <audio controls class="w-100" src="{{ url_for('play_audio', filename=grabacion.nombre_archivo) }}">Tu navegador no soporta el audio.</audio>
+              <small class="text-muted">{{ grabacion.nombre_archivo }}</small>
+            </td>
+            <td style="width: 35%;">
+              <img src="{{ url_for('get_spectrogram', filename=grabacion.path_espectrograma) }}" alt="Espectrograma" class="img-fluid">
+            </td>
+            <td>
+              <strong>Investigador:</strong> {{ grabacion.investigador or 'N/A' }}<br>
+              <strong>Descripción:</strong> {{ grabacion.descripcion or 'N/A' }}
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('delete_audio', grabacion_id=grabacion.id) }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm"
+                        onclick="return confirm('¿Seguro que quieres borrar esta grabación?')">
+                  Borrar
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="text-center">Aún no hay grabaciones para esta aula.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('audio-form').addEventListener('submit', function() {
+    document.getElementById('loader').style.display = 'inline-block';
+    var btn = document.getElementById('submit-audio-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...';
+  });
+</script>
+{% endblock %}
