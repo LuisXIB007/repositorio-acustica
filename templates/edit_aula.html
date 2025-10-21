@@ -1,73 +1,107 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editando {{ aula.nombre_aula }}</title>
-    <style>
-        body { font-family: sans-serif; margin: 2em; }
-        input[type="text"], input[type="number"], textarea, select { 
-            width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; 
-        }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        .checkbox-label { font-weight: normal; }
-        .image-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .image-preview div { border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
-        .image-preview img { width: 100px; height: 100px; object-fit: cover; }
-        .btn-submit { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h1>Editando Aula: {{ aula.edificio }} - {{ aula.nombre_aula }}</h1>
-    
-    <form method="POST" action="{{ url_for('edit_aula', aula_id=aula.id) }}" enctype="multipart/form-data">
-        
-        <label for="edificio">Edificio:</label>
-        <input type="text" name="edificio" id="edificio" value="{{ aula.edificio }}" required>
-        
-        <label for="nombre_aula">Nombre o Número de Aula:</label>
-        <input type="text" name="nombre_aula" id="nombre_aula" value="{{ aula.nombre_aula }}" required>
-        
-        <label for="materiales">Materiales (describir):</label>
-        <textarea name="materiales" id="materiales" rows="3">{{ aula.materiales }}</textarea>
-        
-        <label for="num_ventanas">Número de Ventanas:</label>
-        <input type="number" name="num_ventanas" id="num_ventanas" value="{{ aula.num_ventanas }}">
-        
-        <div>
-            <input type="checkbox" name="cielo_raso" id="cielo_raso" {% if aula.cielo_raso %}checked{% endif %}>
-            <label for="cielo_raso" class="checkbox-label">¿Tiene cielo raso?</label>
-        </div>
-        
-        <div>
-            <input type="checkbox" name="paredes_yeso" id="paredes_yeso" {% if aula.paredes_yeso %}checked{% endif %}>
-            <label for="paredes_yeso" class="checkbox-label">¿Paredes de Yeso (Drywall)?</label>
-        </div>
+{% extends 'base.html' %}
 
-        <hr>
+{% block title %}Editando {{ aula.nombre_aula }}{% endblock %}
 
-        <label>Imágenes Existentes:</label>
-        <div class="image-preview">
-            {% for img in aula.imagenes %}
-            <div>
-                <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto">
-                <br>
-                <input type="checkbox" name="delete_image" value="{{ img.id }}">
-                <label class="checkbox-label">Marcar para Borrar</label>
+{% block content %}
+<h1>Editando Aula: {{ aula.edificio }} - {{ aula.nombre_aula }}</h1>
+<hr>
+<div class="card card-body bg-light">
+  <form method="POST" action="{{ url_for('edit_aula', aula_id=aula.id) }}" enctype="multipart/form-data">
+
+    <div class="mb-3">
+      <label for="edificio" class="form-label">Edificio/Sector:</label>
+      <input type="text" name="edificio" id="edificio" class="form-control" value="{{ aula.edificio }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="nombre_aula" class="form-label">Nombre o Número de Aula:</label>
+      <input type="text" name="nombre_aula" id="nombre_aula" class="form-control" value="{{ aula.nombre_aula }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="num_ventanas" class="form-label">Número de Ventanas:</label>
+      <input type="number" name="num_ventanas" id="num_ventanas" class="form-control" value="{{ aula.num_ventanas }}">
+    </div>
+
+    <hr>
+
+    <h4>Superficies y Materiales Existentes</h4>
+    {% for s in aula.superficies %}
+    <div class="row g-2 mb-2">
+        <div class="col">
+            <input type="text" class="form-control" value="{{ s.nombre_espacio }}" readonly disabled>
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" value="{{ s.material }}" readonly disabled>
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" value="{{ s.area }} m²" readonly disabled>
+        </div>
+        <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="delete_superficie" value="{{ s.id }}" id="delete-s-{{ s.id }}">
+                <label class="form-check-label" for="delete-s-{{ s.id }}">Borrar</label>
             </div>
-            {% else %}
-            <p>No hay imágenes.</p>
-            {% endfor %}
         </div>
+    </div>
+    {% else %}
+    <p class="text-muted">No hay superficies registradas.</p>
+    {% endfor %}
 
-        <label for="imagenes">Añadir Nuevas Imágenes:</label>
-        <input type="file" name="imagenes" id="imagenes" multiple accept="image/*">
-        
-        <p>
-            <input type="submit" value="Guardar Cambios" class="btn-submit">
-        </p>
-    
-    </form>
-    
-    <a href="{{ url_for('aula_detalle', aula_id=aula.id) }}">Cancelar y Volver</a>
-</body>
-</html>
+    <h4 class="mt-4">Añadir Nuevas Superficies</h4>
+    <div id="superficies-container">
+      <div class="row g-2 mb-2 superficie-fila">
+        <div class="col-md-4">
+          <label class="form-label small">Nombre del espacio</label>
+          <input type="text" name="nombre_espacio[]" class="form-control" placeholder="Ej: Pared Norte">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Material</label>
+          <input type="text" name="material[]" class="form-control" placeholder="Ej: Ladrillo pintado">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small">Área (m²)</label>
+          <input type="text" name="area[]" class="form-control" placeholder="Ej: 12,5">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
+    </div>
+    <button type="button" id="add-superficie-btn" class="btn btn-outline-success btn-sm mt-2">+ Añadir otra superficie</button>
+    <hr>
+
+    <label class="form-label">Imágenes Existentes:</label>
+    <div class="mb-3">
+      <label for="imagenes" class="form-label">Añadir Nuevas Imágenes:</label>
+      <input type="file" name="imagenes" id="imagenes" multiple accept="image/*" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Guardar Cambios</button>
+    <a href="{{ url_for('aula_detalle', aula_id=aula.id) }}" class="btn btn-secondary mt-3">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('add-superficie-btn').addEventListener('click', function() {
+    var container = document.getElementById('superficies-container');
+    var newRow = document.createElement('div');
+    newRow.className = 'row g-2 mb-2 superficie-fila';
+    newRow.innerHTML = `
+      <div class="col-md-4"><label class="form-label small">Nombre del espacio</label><input type="text" name="nombre_espacio[]" class="form-control" placeholder="Ej: Suelo"></div>
+      <div class="col-md-4"><label class="form-label small">Material</label><input type="text" name="material[]" class="form-control" placeholder="Ej: Parquet"></div>
+      <div class="col-md-3"><label class="form-label small">Área (m²)</label><input type="text" name="area[]" class="form-control" placeholder="Ej: 30"></div>
+      <div class="col-md-1 d-flex align-items-end"><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">X</button></div>
+    `;
+    container.appendChild(newRow);
+  });
+  function removeRow(button) {
+    var rows = document.querySelectorAll('.superficie-fila');
+    if (rows.length > 1) {
+      button.closest('.superficie-fila').remove();
+    }
+  }
+</script>
+{% endblock %}

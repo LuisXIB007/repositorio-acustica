@@ -48,19 +48,28 @@ class Aula(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     edificio = db.Column(db.String(100), nullable=False)
     nombre_aula = db.Column(db.String(100), nullable=False)
-    materiales = db.Column(db.Text, nullable=True)
     num_ventanas = db.Column(db.Integer, nullable=True)
-    cielo_raso = db.Column(db.Boolean, default=False)
-    paredes_yeso = db.Column(db.Boolean, default=False)
+    superficies = db.relationship('Superficie', backref='aula', lazy=True, cascade="all, delete-orphan")
     
     # Conexión 1: Un Aula puede tener MUCHAS Grabaciones
     grabaciones = db.relationship('Grabacion', backref='aula', lazy=True)
     
-    # Conexión 2: Un Aula puede tener MUCHAS Imágenes
     imagenes = db.relationship('ImagenAula', backref='aula', lazy=True)
 
     def __repr__(self):
         return f'<Aula {self.edificio} - {self.nombre_aula}>'
+
+class Superficie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre_espacio = db.Column(db.String(200), nullable=False)
+    material = db.Column(db.String(200), nullable=False)
+    area = db.Column(db.Float, nullable=False)
+
+    # Vínculo: Esta superficie pertenece a UNA Aula
+    aula_id = db.Column(db.Integer, db.ForeignKey('aula.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Superficie {self.nombre_espacio}: {self.material}>'
 
 class ImagenAula(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -150,15 +159,27 @@ def add_aula():
         nueva_aula = Aula(
             edificio=request.form.get('edificio'),
             nombre_aula=request.form.get('nombre_aula'),
-            materiales=request.form.get('materiales'),
-            num_ventanas=int(request.form.get('num_ventanas', 0)),
-            cielo_raso='cielo_raso' in request.form,
-            paredes_yeso='paredes_yeso' in request.form
+            num_ventanas=int(request.form.get('num_ventanas', 0))
         )
         
         # 2. Añadirla a la sesión para obtener su ID
         db.session.add(nueva_aula)
         db.session.flush() # 'flush' asigna el ID sin guardar permanentemente
+
+        nombres_espacio = request.form.getlist('nombre_espacio[]')
+        materiales = request.form.getlist('material[]')
+        areas = request.form.getlist('area[]')
+
+        for nombre, mat, area in zip(nombres_espacio, materiales, areas):
+        # Solo guardar si el usuario llenó los 3 campos de la fila
+            if nombre and mat and area:
+                nueva_superficie = Superficie(
+                    nombre_espacio=nombre,
+                    material=mat,
+                    area=float(area.replace(',', '.')), # Reemplaza coma por punto
+                    aula_id=nueva_aula.id
+                )
+                db.session.add(nueva_superficie)
 
         # 3. Procesar y guardar las imágenes
         imagenes = request.files.getlist('imagenes')
@@ -211,10 +232,30 @@ def edit_aula(aula_id):
         # --- Actualizar datos del aula ---
         aula.edificio = request.form.get('edificio')
         aula.nombre_aula = request.form.get('nombre_aula')
-        aula.materiales = request.form.get('materiales')
         aula.num_ventanas = int(request.form.get('num_ventanas', 0))
-        aula.cielo_raso = 'cielo_raso' in request.form
-        aula.paredes_yeso = 'paredes_yeso' in request.form
+
+        # --- NUEVO: Borrar superficies seleccionadas ---
+        ids_a_borrar = request.form.getlist('delete_superficie')
+        for s_id in ids_a_borrar:
+            superficie_a_borrar = Superficie.query.get(s_id)
+            if superficie_a_borrar:
+                db.session.delete(superficie_a_borrar)
+
+        # --- NUEVO: Añadir nuevas superficies ---
+        nombres_espacio = request.form.getlist('nombre_espacio[]')
+        materiales = request.form.getlist('material[]')
+        areas = request.form.getlist('area[]')
+
+        for nombre, mat, area in zip(nombres_espacio, materiales, areas):
+            if nombre and mat and area:
+                nueva_superficie = Superficie(
+                    nombre_espacio=nombre,
+                    material=mat,
+                    area=float(area.replace(',', '.')),
+                    aula_id=aula.id
+                )
+                db.session.add(nueva_superficie)
+    # --- FIN DE LAS NUEVAS SECCIONES ---
         
         # --- Borrar imágenes seleccionadas ---
         imagenes_a_borrar_ids = request.form.getlist('delete_image')

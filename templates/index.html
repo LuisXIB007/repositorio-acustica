@@ -31,10 +31,8 @@
       <div class="col-md-6">
         <h5 class="card-title">Detalles</h5>
         <ul class="list-group list-group-flush">
-          <li class="list-group-item"><strong>Materiales:</strong> {{ aula.materiales or 'N/A' }}</li>
           <li class="list-group-item"><strong>Ventanas:</strong> {{ aula.num_ventanas }}</li>
-          <li class="list-group-item"><strong>Cielo Raso:</strong> {% if aula.cielo_raso %}Sí{% else %}No{% endif %}</li>
-          <li class="list-group-item"><strong>Paredes de Yeso:</strong> {% if aula.paredes_yeso %}Sí{% else %}No{% endif %}</li>
+          <li class="list-group-item"><strong>Superficies Registradas:</strong> {{ aula.superficies|length }}</li>
         </ul>
       </div>
       <div class="col-md-6">

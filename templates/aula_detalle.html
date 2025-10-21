@@ -14,11 +14,33 @@
       <div class="col-md-8">
         <h3>Detalles del Aula</h3>
         <ul class="list-group">
-          <li class="list-group-item"><strong>Materiales:</strong> {{ aula.materiales or 'N/A' }}</li>
           <li class="list-group-item"><strong>Núm. Ventanas:</strong> {{ aula.num_ventanas }}</li>
-          <li class="list-group-item"><strong>Cielo Raso:</strong> {% if aula.cielo_raso %}Sí{% else %}No{% endif %}</li>
-          <li class="list-group-item"><strong>Paredes de Yeso:</strong> {% if aula.paredes_yeso %}Sí{% else %}No{% endif %}</li>
         </ul>
+              <h4 class="mt-4">Superficies y Materiales</h4>
+              <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                  <tr>
+                      <th>Nombre del Espacio</th>
+                      <th>Material</th>
+                      <th>Área (m²)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for s in aula.superficies %}
+                    <tr>
+                        <td>{{ s.nombre_espacio }}</td>
+                        <td>{{ s.material }}</td>
+                        <td>{{ s.area }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No hay superficies registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+              </div>
+            <div class="col-md-4">
       </div>
       <div class="col-md-4">
         <h3>Acciones</h3>
@@ -58,7 +80,7 @@
         </div>
         <div class="mb-3">
           <label for="investigador" class="form-label">Investigador:</label>
-          <input type="text" name="investigador" id="investigador" class="form-control" placeholder="Ej: A. Pérez">
+          <input type="text" name="investigador" id="investigador" class="form-control" placeholder="Ej: L. Jácome">
         </div>
         <div class="mb-3">
           <label for="descripcion" class="form-label">Descripción:</label>

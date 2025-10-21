@@ -9,7 +9,7 @@
   <form method="POST" action="{{ url_for('add_aula') }}" enctype="multipart/form-data">
 
     <div class="mb-3">
-      <label for="edificio" class="form-label">Edificio:</label>
+      <label for="edificio" class="form-label">Edificio/Sector:</label>
       <input type="text" name="edificio" id="edificio" class="form-control" required>
     </div>
 
@@ -19,33 +19,84 @@
     </div>
 
     <div class="mb-3">
-      <label for="materiales" class="form-label">Materiales (describir):</label>
-      <textarea name="materiales" id="materiales" rows="3" class="form-control"></textarea>
-    </div>
-
-    <div class="mb-3">
       <label for="num_ventanas" class="form-label">Número de Ventanas:</label>
       <input type="number" name="num_ventanas" id="num_ventanas" value="0" class="form-control">
     </div>
 
-    <div class="form-check mb-3">
-      <input type="checkbox" name="cielo_raso" id="cielo_raso" class="form-check-input">
-      <label for="cielo_raso" class="form-check-label">¿Tiene cielo raso?</label>
+    <hr>
+
+    <h4>Superficies y Materiales</h4>
+    <p>Añade las superficies principales (paredes, suelo, techo, etc.) con su material y área.</p>
+
+    <div id="superficies-container">
+      <div class="row g-2 mb-2 superficie-fila">
+        <div class="col-md-4">
+          <label class="form-label small">Nombre del espacio</label>
+          <input type="text" name="nombre_espacio[]" class="form-control" placeholder="Ej: Pared Norte">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Material</label>
+          <input type="text" name="material[]" class="form-control" placeholder="Ej: Ladrillo">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small">Área (m²)</label>
+          <input type="text" name="area[]" class="form-control" placeholder="Ej: 12,5">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">X</button>
+        </div>
+      </div>
     </div>
 
-    <div class="form-check mb-3">
-      <input type="checkbox" name="paredes_yeso" id="paredes_yeso" class="form-check-input">
-      <label for="paredes_yeso" class="form-check-label">¿Paredes de Yeso (Drywall)?</label>
-    </div>
+    <button type="button" id="add-superficie-btn" class="btn btn-outline-success btn-sm mt-2">+ Añadir otra superficie</button>
+    <hr>
 
     <div class="mb-3">
       <label for="imagenes" class="form-label">Imágenes del aula (puedes subir varias):</label>
       <input type="file" name="imagenes" id="imagenes" multiple accept="image/*" class="form-control">
     </div>
 
-    <button type="submit" class="btn btn-primary">Guardar Aula</button>
-    <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary mt-3">Guardar Aula</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Cancelar</a>
 
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Función para añadir una nueva fila
+  document.getElementById('add-superficie-btn').addEventListener('click', function() {
+    var container = document.getElementById('superficies-container');
+    var newRow = document.createElement('div');
+    newRow.className = 'row g-2 mb-2 superficie-fila';
+    newRow.innerHTML = `
+      <div class="col-md-4">
+        <label class="form-label small">Nombre del espacio</label>
+        <input type="text" name="nombre_espacio[]" class="form-control" placeholder="Ej: Suelo">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small">Material</label>
+        <input type="text" name="material[]" class="form-control" placeholder="Ej: Parquet">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Área (m²)</label>
+        <input type="text" name="area[]" class="form-control" placeholder="Ej: 30">
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">X</button>
+      </div>
+    `;
+    container.appendChild(newRow);
+  });
+
+  // Función para quitar una fila
+  function removeRow(button) {
+    // No dejes que se borre la última fila
+    var rows = document.querySelectorAll('.superficie-fila');
+    if (rows.length > 1) {
+      button.closest('.superficie-fila').remove();
+    }
+  }
+</script>
 {% endblock %}
