@@ -72,11 +72,27 @@
     <hr>
 
     <label class="form-label">Imágenes Existentes:</label>
-    <div class="mb-3">
-      <label for="imagenes" class="form-label">Añadir Nuevas Imágenes:</label>
-      <input type="file" name="imagenes" id="imagenes" multiple accept="image/*" class="form-control">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+    
+        {% for img in aula.imagenes %}
+        <div class="card p-2">
+            <img src="{{ url_for('get_aula_image', filename=img.filename) }}" alt="Foto" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+            <div class="form-check mt-1">
+                <input type="checkbox" name="delete_image" value="{{ img.id }}" class="form-check-input" id="delete-img-{{ img.id }}">
+                <label class="form-check-label small" for="delete-img-{{ img.id }}">Marcar para Borrar</label>
+            </div>
+        </div>
+        {% else %}
+            <p class="text-muted">No hay imágenes.</p>
+        {% endfor %}
+
     </div>
 
+    <div class="mb-3">
+        <label for="imagenes" class="form-label">Añadir Nuevas Imágenes:</label>
+        <input type="file" name="imagenes" id="imagenes" multiple accept="image/*" class="form-control">
+    </div>
+    
     <button type="submit" class="btn btn-success mt-3">Guardar Cambios</button>
     <a href="{{ url_for('aula_detalle', aula_id=aula.id) }}" class="btn btn-secondary mt-3">Cancelar</a>
   </form>
