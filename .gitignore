@@ -1,5 +1,14 @@
-venv/
+# Archivos de base de datos
 database.db
+*.sqlite
+*.db
+
+# Carpetas de archivos subidos
 uploads/
 spectrograms/
+
+# Archivos de Python y sistema
+__pycache__/
+*.pyc
 .devcontainer.json
+venv/
